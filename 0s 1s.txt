@@ -1,0 +1,70 @@
+.model small
+.stack 100h
+.data
+    number db 5Ah          ; Example 8-bit number: 01011010b
+    ones_count db 0
+    zeros_count db 0
+    msg1 db 'Number of 1''s: $'
+    msg2 db 'Number of 0''s: $'
+
+.code
+main:
+    mov ax, @data
+    mov ds, ax
+
+    mov cl, 8              ; 8 bits to check
+    mov al, number         ; Load the number into AL
+
+count_loop:
+    rcr al, 1              ; Rotate right through carry
+    jc increment_ones      ; If carry set, it's a 1
+    inc zeros_count        ; Else, it's a 0
+    jmp next_bit
+
+increment_ones:
+    inc ones_count
+
+next_bit:
+    loop count_loop
+
+    ; Display "Number of 1's: "
+    lea dx, msg1
+    mov ah, 09h
+    int 21h
+
+    ; Display ones_count
+    mov al, ones_count
+    call DisplayDigit
+
+    ; New line
+    mov dl, 0Ah
+    mov ah, 02h
+    int 21h
+    mov dl, 0Dh
+    mov ah, 02h
+    int 21h
+
+    ; Display "Number of 0's: "
+    lea dx, msg2
+    mov ah, 09h
+    int 21h
+
+    ; Display zeros_count
+    mov al, zeros_count
+    call DisplayDigit
+
+    ; Exit to DOS
+    mov ah, 4Ch
+    int 21h
+
+;---------------------------------
+; Subroutine: DisplayDigit
+; AL = value to display (0-9 assumed)
+DisplayDigit:
+    add al, 30h
+    mov dl, al
+    mov ah, 02h
+    int 21h
+    ret
+
+end main

@@ -1,0 +1,44 @@
+Data Segment
+str1 db 'Naved','$' ; Input string
+strlen1 dw $-str1 ; Length of the string
+strrev db 20 dup('$') ; Buffer for the reversed string
+str_palin db 'String is not Palindrome.$' ; Message for palindrome case
+str_not_palin db 'String is Palindrome.$' ; Message for non-palindrome case
+Data Ends
+Code Segment
+Assume cs:code, ds:data
+Begin:
+mov ax, data
+mov ds, ax
+mov es, ax
+mov cx, strlen1
+add cx, -1 ; Adjust length
+lea si, str1 ; Point SI to str1
+lea di, strrev ; Point DI to strrev
+add si, cx ; Move SI to the last character
+Reverse_String:
+mov al, [si] ; Load character from str1
+mov [di], al ; Store in strrev
+dec si ; Move SI backward
+inc di ; Move DI forward
+loop Reverse_String ; Repeat until all characters copied
+mov al, '$' ; Add null terminator
+mov [di], al
+lea si, str1 ; Reset SI to start of str1
+lea di, strrev ; Reset DI to start of strrev
+mov cx, strlen1 ; Set CX to length of string
+repe cmpsb ; Compare strings
+jne Not_Palin ; If different, jump to Not_Palin
+Palin:
+mov ah, 09h ; DOS print functionlea dx, str_palin ; Load "String is Palindrome."
+int 21h ; Print message
+jmp Exit ; Exit program
+Not_Palin:
+mov ah, 09h ; DOS print function
+lea dx, str_not_palin ; Load "String is not Palindrome."
+int 21h ; Print message
+Exit:
+mov ax, 4c00h ; Exit program
+int 21h
+Code Ends
+End Begin

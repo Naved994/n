@@ -1,0 +1,76 @@
+.model small
+.stack 100h
+.data
+    num1 db 12h, 34h    ; BCD 1234
+    num2 db 56h, 78h    ; BCD 5678
+    res  db 0, 0        ; Result storage (2 bytes)
+    msg  db 'Result: $'
+
+.code
+main:
+    ; Initialize DS
+    mov ax, @data
+    mov ds, ax
+
+    ; Add lower byte (34 + 78)
+    mov al, [num1+1]
+    add al, [num2+1]
+    daa                 ; BCD adjust
+    mov [res+1], al
+
+    ; Add higher byte (12 + 56 + carry)
+    mov al, [num1]
+    adc al, [num2]
+    daa                 ; BCD adjust
+    mov [res], al
+
+    ; Display "Result: "
+    lea dx, msg
+    mov ah, 09h
+    int 21h
+
+    ; Display higher byte (2 digits)
+    mov al, [res]
+    call DisplayBCD
+
+    ; Display lower byte (2 digits)
+    mov al, [res+1]
+    call DisplayBCD
+
+    ; Exit to DOS
+    mov ah, 4Ch
+    int 21h
+
+;---------------------------------
+; Subroutine: DisplayBCD
+; AL = BCD byte
+DisplayBCD:
+    push ax
+    push cx
+
+    ; upper nibble
+    mov cl, 4
+    and al, 0F0h
+    shr al, cl
+    add al, 30h
+    mov dl, al
+    mov ah, 02h
+    int 21h
+
+    pop cx
+    pop ax
+    push ax
+    push cx
+
+    ; lower nibble
+    and al, 0Fh
+    add al, 30h
+    mov dl, al
+    mov ah, 02h
+    int 21h
+
+    pop cx
+    pop ax
+    ret
+
+end main

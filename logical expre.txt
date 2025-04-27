@@ -1,0 +1,80 @@
+.model small
+.stack 100h
+.data
+A db 0FFh     ; A = 11111111b
+B db 0F0h     ; B = 11110000b
+C db 0AAh     ; C = 10101010b
+Result db ?
+msg db 'Result: $'
+
+.code
+main:
+    mov ax, @data
+    mov ds, ax
+
+    ; Perform A AND B
+    mov al, A
+    and al, B
+
+    ; Perform NOT C
+    mov bl, C
+    not bl
+
+    ; Now OR the two results
+    or al, bl
+
+    ; Store the result
+    mov Result, al
+
+    ; Display "Result: "
+    lea dx, msg
+    mov ah, 09h
+    int 21h
+
+    ; Display the result in HEX
+    mov al, Result
+    call display_hex
+
+    ; Exit
+    mov ah, 4Ch
+    int 21h
+
+;--------------------------------------------------------
+; Display AL in Hexadecimal
+display_hex proc
+    push ax
+    push bx
+
+    ; Upper nibble
+   mov ah, al
+and ah, 0F0h
+mov cl, 4
+shr ah, cl
+
+    call print_hex_digit
+
+    ; Lower nibble
+    mov ah, al
+    and ah, 0Fh
+    call print_hex_digit
+
+    pop bx
+    pop ax
+    ret
+display_hex endp
+
+;--------------------------------------------------------
+; Print a single hex digit (0-F)
+print_hex_digit proc
+    add ah, '0'
+    cmp ah, '9'
+    jbe print_digit
+    add ah, 7
+print_digit:
+    mov dl, ah
+    mov ah, 02h
+    int 21h
+    ret
+print_hex_digit endp
+
+end main

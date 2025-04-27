@@ -1,0 +1,99 @@
+.model small
+.stack 100h
+.data
+    n db 10            ; Number of Fibonacci numbers
+    msg db 0Dh,0Ah,'Fibonacci Series:$'
+
+.code
+main:
+    mov ax, @data
+    mov ds, ax
+
+    ; Print message
+    lea dx, msg
+    mov ah, 09h
+    int 21h
+
+    ; Initialize Fibonacci numbers
+    mov ax, 0          ; AX = 0 (first number)
+    mov bx, 1          ; BX = 1 (second number)
+
+    ; Display first number (AX)
+    mov cx, ax
+    call display_num
+
+    ; Display second number (BX)
+    mov cx, bx
+    call display_num
+
+    ; n = total numbers
+    mov dl, n
+    sub dl, 2          ; 2 numbers already printed
+
+fib_loop:
+    ; Next Fibonacci number = AX + BX
+    mov cx, ax
+    add cx, bx         ; CX = AX + BX
+
+    ; Update AX = BX, BX = CX
+    mov ax, bx
+    mov bx, cx
+
+    ; Display CX
+    call display_num
+
+    dec dl
+    jnz fib_loop
+
+    ; Exit
+    mov ah, 4Ch
+    int 21h
+
+; --------------------------
+; Procedure to display number in decimal
+display_num proc
+    push ax
+    push bx
+    push cx
+    push dx
+
+    ; New Line
+    mov ah, 02h
+    mov dl, 0Dh
+    int 21h
+    mov dl, 0Ah
+    int 21h
+
+    ; Now CX has the number to print
+    mov ax, cx
+    xor dx, dx
+    xor bx, bx
+    mov bx, 10
+
+    ; Save digits onto stack
+    mov si, 0
+
+store_digits:
+    xor dx, dx
+    div bx
+    add dl, '0'
+    push dx
+    inc si
+    cmp ax, 0
+    jne store_digits
+
+print_digits:
+    pop dx
+    mov ah, 02h
+    int 21h
+    dec si
+    jnz print_digits
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret
+display_num endp
+
+end main

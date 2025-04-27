@@ -1,0 +1,27 @@
+data segment
+num dw 4 ; Given number to check (change as needed)
+msg_even db 'Number is Even$'
+msg_odd db 'Number is Odd$'
+data ends
+code segment
+assume cs:code, ds:data
+start:
+mov ax, data ; Initialize data segment
+mov ds, ax
+mov ax, num ; Load the number into AX
+and ax, 1 ; Check the least significant bit
+jz even_number ; If zero, jump to even_number
+odd_number:
+lea dx, msg_odd ; Load address of odd message
+mov ah, 9 ; Display string function
+int 21h ; Call DOS interrupt
+jmp end_program ; Jump to end
+even_number:
+lea dx, msg_even ; Load address of even message
+mov ah, 9 ; Display string function
+int 21h ; Call DOS interrupt
+end_program:
+mov ah, 4Ch ; Exit program
+int 21h
+code ends
+end start
